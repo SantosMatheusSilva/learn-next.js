@@ -5,6 +5,8 @@ import {
   CustomersTableType,
   FormattedCustomersTable,
 } from '@/app/lib/definitions';
+import Link from 'next/link'
+import {Details, Create} from './buttons';
 
 export default async function CustomersTable({
   customers,
@@ -16,7 +18,11 @@ export default async function CustomersTable({
       <h1 className={`${lusitana.className} mb-8 text-xl md:text-2xl`}>
         Customers
       </h1>
+      <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
       <Search placeholder="Search customers..." />
+      <Create/>
+      </div>
+      
       <div className="mt-6 flow-root">
         <div className="overflow-x-auto">
           <div className="inline-block min-w-full align-middle">
@@ -95,7 +101,9 @@ export default async function CustomersTable({
                             width={28}
                             height={28}
                           />
-                          <p>{customer.name}</p>
+                          <Link href={`/dashboard/customers/${customer.id}`}>
+                          <p className='font-medium'>{customer.name}</p>
+                          </Link>
                         </div>
                       </td>
                       <td className="whitespace-nowrap bg-white px-4 py-5 text-sm">
@@ -109,6 +117,9 @@ export default async function CustomersTable({
                       </td>
                       <td className="whitespace-nowrap bg-white px-4 py-5 text-sm group-first-of-type:rounded-md group-last-of-type:rounded-md">
                         {customer.total_paid}
+                      </td>
+                      <td>
+                        <Details id={customer.id} />
                       </td>
                     </tr>
                   ))}

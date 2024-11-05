@@ -2,16 +2,24 @@ import Image from 'next/image';
 import { UpdateInvoice, DeleteInvoice } from '@/app/ui/invoices/buttons';
 import InvoiceStatus from '@/app/ui/invoices/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
-import { fetchFilteredInvoices } from '@/app/lib/data';
+import { fetchFilteredInvoices, fetchInvoicesByCustomerId } from '@/app/lib/data';
 
 export default async function InvoicesTable({
   query,
   currentPage,
+  customerId
 }: {
   query: string;
   currentPage: number;
+  customerId?: string;
 }) {
-  const invoices = await fetchFilteredInvoices(query, currentPage);
+  //const invoices = await fetchFilteredInvoices(query, currentPage);
+
+  const invoices = customerId 
+    ? await fetchInvoicesByCustomerId(customerId, currentPage)
+    : await fetchFilteredInvoices(query, currentPage);
+
+    //console.log(invoices)
 
   return (
     <div className="mt-6 flow-root">
@@ -58,7 +66,7 @@ export default async function InvoicesTable({
             <thead className="rounded-lg text-left text-sm font-normal">
               <tr>
                 <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
-                  Customer
+                  Customer 
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
                   Email

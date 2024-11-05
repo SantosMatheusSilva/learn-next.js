@@ -1,5 +1,6 @@
 import { sql } from '@vercel/postgres';
 import {
+  Customer,
   CustomerField,
   CustomersTableType,
   InvoiceForm,
@@ -87,6 +88,7 @@ const ITEMS_PER_PAGE = 6;
 export async function fetchFilteredInvoices(
   query: string,
   currentPage: number,
+  customerId?: string,
 ) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
@@ -118,6 +120,34 @@ export async function fetchFilteredInvoices(
     throw new Error('Failed to fetch invoices.');
   }
 }
+
+export async function fetchInvoicesByCustomerId(customerId: string, currentPage: number) {
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  try {
+    const invoices = await sql<InvoicesTable[]>`
+      SELECT
+        invoices.id,
+        invoices.amount,
+        invoices.date,
+        invoices.status,
+        customers.name,
+        customers.email,
+        customers.image_url
+      FROM invoices
+      JOIN customers ON invoices.customer_id = customers.id
+      WHERE invoices.customer_id = ${customerId}  -- Filter by customer_id
+      ORDER BY invoices.date DESC
+      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
+    `;
+
+    return invoices?.rows || [];
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch invoices for the specified customer.');
+  }
+}
+
 
 export async function fetchInvoicesPages(query: string) {
   try {
@@ -183,8 +213,39 @@ export async function fetchCustomers() {
   }
 }
 
+export async function fetchCustomerById(id: string) {
+  try {
+    const data = await sql<Customer>`
+      SELECT
+        customers.id,
+        customers.name,
+        customers.email,
+        customers.image_url,
+        COUNT(invoices.id) AS total_invoices,
+        SUM(CASE WHEN invoices.status = 'pending' THEN invoices.amount ELSE 0 END) AS total_pending,
+        SUM(CASE WHEN invoices.status = 'paid' THEN invoices.amount ELSE 0 END) AS total_paid
+      FROM customers
+      LEFT JOIN invoices ON invoices.customer_id = customers.id
+      WHERE customers.id = ${id}
+      GROUP BY customers.id, customers.name, customers.email, customers.image_url
+      `;
+   
+    const customer = data.rows.map((customer) => ({
+      ...customer,
+      total_pending: formatCurrency(customer.total_pending),
+      total_paid: formatCurrency(customer.total_paid),
+    }));
+    
+    return customer[0];
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error ('Failed to fetch user.')
+  }
+}
+
 export async function fetchFilteredCustomers(query: string) {
   try {
+    
     const data = await sql<CustomersTableType>`
 		SELECT
 		  customers.id,
@@ -215,3 +276,4 @@ export async function fetchFilteredCustomers(query: string) {
     throw new Error('Failed to fetch customer table.');
   }
 }
+

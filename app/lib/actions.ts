@@ -1,6 +1,6 @@
 'use server';
 
-import { z } from 'zod';
+import { date, z } from 'zod';
 import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
@@ -28,6 +28,8 @@ export type State = {
         customerId?: string[];
         amount?: string[];
         status?: string[];
+        name?: string[];
+        email?: string[];
     };
     message?: string | null;
 };
@@ -112,6 +114,47 @@ export async function deleteInvoice(id: string) {
     return { message: 'Database Error: Failed to Delete Invoices.'};
   }
   }
+
+  // Form Schema for the add customer form 
+const AddCustomerSchema = z.object({
+    name: z.string().min(1, 'Name is required.'),
+    email: z.string().email('Invalid Email.'),
+    image_url: z.string().default('https://i.pravatar.cc/300'),
+})
+
+
+
+  export async function createCustomer(prevState: State, formData: FormData) {
+     
+    const validatedFields = AddCustomerSchema.safeParse({
+        name: formData.get('name'),
+        email: formData.get('email'),
+        image_url: formData.get('image_url') ||'https://i.pravatar.cc/300',
+    });
+
+    if(!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Missing Fields. Failed to Add Customer.',
+        };
+    }
+
+    const {name, email, image_url} = validatedFields.data;
+    //const date = new Date().toISOString().split('T')[0];
+
+    try {
+        await sql`
+        INSERT INTO customers (name, email, image_url) 
+        VALUES (${name}, ${email}, ${image_url})`;
+
+        revalidatePath('/dashboard/customers');
+        redirect('/dashboard/customers');
+    } catch (error) {
+        return {
+            message: 'Data Base Error. Failed to Add Customer.'
+        };
+    }
+  };
 
   export async function authenticate (
     prevState: string | undefined ,
