@@ -24,14 +24,15 @@ const CreateInvoice = FormSchema.omit({id: true, date: true });
 const UpdateInvoice = FormSchema.omit({id: true, date: true });
 
 export type State = {
-    errors?: {
+    errors: {
         customerId?: string[];
         amount?: string[];
         status?: string[];
         name?: string[];
         email?: string[];
+        image_url?: string[];
     };
-    message?: string | null;
+    message: string | null;
 };
 
 export async function createInvoice(prevState: State, formData: FormData) {
@@ -128,7 +129,7 @@ const AddCustomerSchema = z.object({
 
 
 
-  export async function createCustomer(state: State, formData: FormData) {
+  export async function createCustomer(prevState: State, formData: FormData): Promise<State> {
      
     const validatedFields = AddCustomerSchema.safeParse({
         name: formData.get('name'),
@@ -156,10 +157,15 @@ const AddCustomerSchema = z.object({
     } catch (error) {
         console.error('An Error ocured:', error);
         return {
-            message: 'Data Base Error. Failed to Add Customer.'
+            message: 'Data Base Error. Failed to Add Customer.',
+            errors: {}
         };
     }
+    return {
+        message: 'Customer Added Successfully.',
+        errors: {}
   };
+}
 
   export async function authenticate (
     prevState: string | undefined ,
