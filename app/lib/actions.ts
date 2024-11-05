@@ -118,6 +118,7 @@ export async function deleteInvoice(id: string) {
   }
   }
 
+  
   // Form Schema for the add customer form 
 const AddCustomerSchema = z.object({
     name: z.string().min(1, 'Name is required.'),
@@ -127,7 +128,7 @@ const AddCustomerSchema = z.object({
 
 
 
-  export async function createCustomer(prevState: State, formData: FormData) {
+  export async function createCustomer(state: State, formData: FormData) {
      
     const validatedFields = AddCustomerSchema.safeParse({
         name: formData.get('name'),
@@ -150,8 +151,8 @@ const AddCustomerSchema = z.object({
         INSERT INTO customers (name, email, image_url) 
         VALUES (${name}, ${email}, ${image_url})`;
 
-        revalidatePath('/dashboard/customers');
         redirect('/dashboard/customers');
+        revalidatePath('/dashboard/customers');
     } catch (error) {
         console.error('An Error ocured:', error);
         return {

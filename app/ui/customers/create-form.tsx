@@ -29,7 +29,7 @@ export default function Form() {
                 />
               </div>
               <div id="customer-error" aria-live="polite" aria-atomic="true">
-                {state.errors?.name &&
+                {state && state.errors?.name &&
                   state.errors.name.map((error: string) => (
                     <p className="mt-2 text-sm text-red-500" key={error}>
                       {error}
@@ -54,7 +54,7 @@ export default function Form() {
                 />
               </div>
               <div id="customer-error" aria-live="polite" aria-atomic="true">
-              {state.errors?.email &&
+              {state && state.errors?.email &&
                 state.errors.email.map((error: string) => (
                   <p className="mt-2 text-sm text-red-500" key={error}>
                     {error}
@@ -79,7 +79,7 @@ export default function Form() {
                     />
                 </div>
                 <div id="customer-error" aria-live="polite" aria-atomic="true">
-              {state.errors?.image_url &&
+              {state && state.errors?.image_url &&
                 state.errors.image_url.map((error: string) => (
                   <p className="mt-2 text-sm text-red-500" key={error}>
                     {error}
