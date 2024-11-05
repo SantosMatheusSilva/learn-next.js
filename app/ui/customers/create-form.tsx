@@ -4,14 +4,11 @@ import Link from 'next/link';
 import { Button } from '@/app/ui/button';
 import { createCustomer, State } from '@/app/lib/actions';
 import { useActionState } from 'react';
-import { CreateCustomer } from '@/app/lib/definitions';
 
 
 export default function Form() {
     const initialState: State = {message: null, errors: {}};
     const [state, formAction] = useActionState(createCustomer, initialState); 
-
-    console.log('state---->', state);
 
     return (
       <form action={formAction}>

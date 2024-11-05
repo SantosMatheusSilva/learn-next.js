@@ -1,10 +1,10 @@
 import Breadcrumbs from "@/app/ui/invoices/breadcrumbs";
-import { fetchCustomerById, fetchInvoicesByCustomerId } from "@/app/lib/data";
+import { fetchCustomerById} from "@/app/lib/data";
 import  Table  from "@/app/ui/invoices/table";
 import { Suspense } from "react";
 import { InvoicesTableSkeleton } from "@/app/ui/skeletons";
+import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import { lusitana } from '@/app/ui/fonts';
 
 export default async function Page({ params } : { params: {customerId : string, query: string}}){
     console.log(params);
@@ -13,13 +13,12 @@ export default async function Page({ params } : { params: {customerId : string, 
     //const {currentPage} = params;
     
     const customer = await fetchCustomerById(customerId);
-    const invoices = await fetchInvoicesByCustomerId(customerId, 1);
+    //const invoices = await fetchInvoicesByCustomerId(customerId, 1);
 
-    //const totalInvoices = invoices.length;
-  
-    //console.log(customer);
-    //console.log(invoices);
-    if (!customer)  return <p>Customer not found.</p>
+    
+    if (!customer) {
+        notFound();
+    }
 
     return (
         <main>
