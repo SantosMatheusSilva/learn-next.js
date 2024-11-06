@@ -2,7 +2,8 @@ import Image from 'next/image';
 import { UpdateInvoice, DeleteInvoice } from '@/app/ui/invoices/buttons';
 import InvoiceStatus from '@/app/ui/invoices/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
-import { fetchFilteredInvoices, fetchInvoicesByCustomerId } from '@/app/lib/data';
+import { fetchFilteredInvoices, fetchInvoicesByCustomerId, fetchCustomerById} from '@/app/lib/data';
+import { Invoice } from '@/app/lib/definitions';
 
 export default async function InvoicesTable({
   query,
@@ -13,20 +14,23 @@ export default async function InvoicesTable({
   currentPage: number;
   customerId?: string;
 }) {
-  //const invoices = await fetchFilteredInvoices(query, currentPage);
-
-  const invoices = customerId 
+  const invoices: Invoice[] = customerId 
     ? await fetchInvoicesByCustomerId(customerId, currentPage)
     : await fetchFilteredInvoices(query, currentPage);
 
-    //console.log(invoices)
-
+    const invoicesWithCustomer = await Promise.all(
+      invoices.map(async (invoice) => {
+        const customer = await fetchCustomerById(invoice.customer_id);
+        return { ...invoice, customer };
+      })
+    );
+  
   return (
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
         <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
           <div className="md:hidden">
-            {invoices?.map((invoice) => (
+            {invoicesWithCustomer.map((invoice) => (
               <div
                 key={invoice.id}
                 className="mb-2 w-full rounded-md bg-white p-4"

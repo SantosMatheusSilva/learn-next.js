@@ -22,7 +22,7 @@ export type Customer = {
 export type CreateCustomer = {
   name: string;
   email: string;
-  image_url?: string;
+  image_url: string;
 }
 
 export type Invoice = {
