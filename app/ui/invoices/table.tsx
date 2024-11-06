@@ -15,22 +15,25 @@ export default async function InvoicesTable({
   customerId?: string;
 }) {
   const invoices: Invoice[] = customerId 
-    ? await fetchInvoicesByCustomerId(customerId, currentPage)
-    : await fetchFilteredInvoices(query, currentPage);
+    ? (await fetchInvoicesByCustomerId(customerId, currentPage)).flat()
+    : (await fetchFilteredInvoices(query, currentPage)).flat();
 
-    const invoicesWithCustomer = await Promise.all(
+  //console.log('invoices:',invoices)
+
+  /*   const invoicesWithCustomer = await Promise.all(
       invoices.map(async (invoice) => {
         const customer = await fetchCustomerById(invoice.customer_id);
-        return { ...invoice, customer };
+        console.log('Fetched customer:', customer);
+        return { ...invoice, customer: customer || {} };
       })
-    );
+    ); */
   
   return (
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
         <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
           <div className="md:hidden">
-            {invoicesWithCustomer.map((invoice) => (
+            {invoices.map((invoice) => (
               <div
                 key={invoice.id}
                 className="mb-2 w-full rounded-md bg-white p-4"
@@ -43,7 +46,7 @@ export default async function InvoicesTable({
                         className="mr-2 rounded-full"
                         width={28}
                         height={28}
-                        alt={`${invoice.name}'s profile picture`}
+                        alt={`${invoice.name }'s profile picture`}
                       />
                       <p>{invoice.name}</p>
                     </div>
@@ -90,7 +93,7 @@ export default async function InvoicesTable({
               </tr>
             </thead>
             <tbody className="bg-white">
-              {invoices?.map((invoice) => (
+              {invoices.map((invoice) => (
                 <tr
                   key={invoice.id}
                   className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"

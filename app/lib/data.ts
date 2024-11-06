@@ -232,8 +232,8 @@ export async function fetchCustomerById(id: string) {
    
     const customer = data.rows.map((customer) => ({
       ...customer,
-      total_pending: formatCurrency(customer.total_pending),
-      total_paid: formatCurrency(customer.total_paid),
+      total_pending: formatCurrency(customer.total_pending ?? 0),
+      total_paid: formatCurrency(customer.total_paid ?? 0),
     }));
     
     return customer[0];
