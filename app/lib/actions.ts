@@ -35,7 +35,7 @@ export type State = {
     message: string | null;
 };
 
-export async function createInvoice(prevState: State, formData: FormData) {
+export async function createInvoice(prevState: State, formData: FormData): Promise<State> {
     // Validate form fields using zod
     const validatedFields = CreateInvoice.safeParse({
         customerId: formData.get('customerId'),
@@ -65,13 +65,17 @@ export async function createInvoice(prevState: State, formData: FormData) {
         // If error, return a specific error message.
         return {
             message: 'Database Error: Failed to Create Invoice.',
+            errors: {}
         };
     }
-
-    // Revallidate cache for the invoices page and rediret the user.
-    revalidatePath('/dashboard/invoices');
-    redirect('/dashboard/invoices');
-
+      // Revallidate cache for the invoices page and rediret the user.
+      revalidatePath('/dashboard/invoices');
+      redirect('/dashboard/invoices');
+    return {
+        message: 'Invoice Created Successfully.',
+        errors: {}
+    }
+  
 }
 
 export async function updateInvoice(id: string, prevState: State, formdata: FormData) {
@@ -152,8 +156,7 @@ const AddCustomerSchema = z.object({
         INSERT INTO customers (name, email, image_url) 
         VALUES (${name}, ${email}, ${image_url})`;
 
-        redirect('/dashboard/customers');
-        revalidatePath('/dashboard/customers');
+        
     } catch (error) {
         console.error('An Error ocured:', error);
         return {
@@ -161,10 +164,14 @@ const AddCustomerSchema = z.object({
             errors: {}
         };
     }
+    redirect('/dashboard/customers');
+    revalidatePath('/dashboard/customers');
     return {
         message: 'Customer Added Successfully.',
-        errors: {}
+        errors: {},
   };
+  
+  
 }
 
   export async function authenticate (
