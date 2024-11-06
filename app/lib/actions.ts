@@ -78,7 +78,7 @@ export async function createInvoice(prevState: State, formData: FormData): Promi
   
 }
 
-export async function updateInvoice(id: string, prevState: State, formdata: FormData) {
+export async function updateInvoice(id: string, prevState: State, formdata: FormData): Promise<State> {
    const validatedFields = UpdateInvoice.safeParse({
     //id: formdata.get('id'),
     customerId: formdata.get('customerId'),
@@ -88,7 +88,7 @@ export async function updateInvoice(id: string, prevState: State, formdata: Form
 
    if(!validatedFields.success) {
     return {
-        errors: validatedFields.error.flatten(),
+        errors: validatedFields.error.flatten().fieldErrors,
         message: 'Missing Fields. Failed to Update Invoice.',
     };
    }
@@ -105,11 +105,16 @@ export async function updateInvoice(id: string, prevState: State, formdata: Form
         console.error('An Error ocured:', error);
         return {
             message: 'Database Error: Failed to Update Invoice.',
-        };
+            errors: {},
+        }
     }
-
+    // Revalidate cache for the invoices page and redirect the user.
     revalidatePath('/dashboard/invoices');
     redirect('/dashboard/invoices');
+    return {
+        message: 'Invoice Updated Successfully.',
+        errors: {},
+    }
 }
 
 export async function deleteInvoice(id: string) {
